@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { BORDER_RADIUS, PADDING } from "../theme/variables";
+import { useNavigate } from "../router/useNavigate";
 
-export default function App() {
+export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <ChooseDisplayName />
@@ -12,9 +14,10 @@ export default function App() {
 function ChooseDisplayName() {
   const [name, setName] = useState("");
   const [error, setError] = useState<null | string>(null);
+  const navigate = useNavigate();
 
   function updateName(name: string) {
-    setName(name);
+    setName(name.trim());
     setError(null);
   }
 
@@ -23,6 +26,7 @@ function ChooseDisplayName() {
       setError("Name is required");
       return;
     }
+    navigate({ pathname: "/chat", params: { name } });
   }
 
   return (
@@ -45,9 +49,6 @@ function ChooseDisplayName() {
     </View>
   );
 }
-
-const BORDER_RADIUS = 8;
-const PADDING = 8;
 
 const textInputStyles = StyleSheet.create({
   textInput: {
