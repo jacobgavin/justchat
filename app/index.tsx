@@ -1,13 +1,28 @@
 import { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Button,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
 import { useNavigate } from "../router/useNavigate";
 
 export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <ChooseDisplayName />
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ChooseDisplayName />
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
