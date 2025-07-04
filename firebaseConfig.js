@@ -1,4 +1,12 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApp } from "firebase/app";
+
+const createFirebaseApp = (config = {}) => {
+  try {
+    return getApp();
+  } catch {
+    return initializeApp(config);
+  }
+};
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_API_KEY,
@@ -8,9 +16,8 @@ const firebaseConfig = {
   storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
   messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
   appId: process.env.EXPO_PUBLIC_APP_ID,
-  measurementId: process.env.EXPO_PUBLIC_MEASURMENT_ID,
 };
 
-export const app = initializeApp(firebaseConfig);
+export const app = createFirebaseApp(firebaseConfig);
 // For more information on how to access Firebase in your project,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
