@@ -9,15 +9,14 @@ import {
 } from "react-native";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
-import { messageCollection } from "../firebase/messageCollection";
 import ChatList from "../features/ChatList";
 import { useIsKeyboardOpen } from "../hooks/useIsKeyboardOpen";
 import { defaultTo } from "lodash";
 import Button from "@ui/Button";
+import { createMessage } from "../api/messages";
 
 export default function ChatScreen() {
   const { name } = useLocalSearchParams();
@@ -59,9 +58,9 @@ function Footer({ name }: { name: string }) {
   const [message, setMessage] = useState("");
   const isKeyboardOpen = useIsKeyboardOpen();
 
-  const createMessage = useMutation({
+  const { mutateAsync } = useMutation({
     mutationKey: ["messages"],
-    mutationFn: postMessage,
+    mutationFn: createMessage,
   });
 
   function updateMessage(message: string) {
@@ -75,7 +74,7 @@ function Footer({ name }: { name: string }) {
     if (message.trim() === "") {
       return;
     }
-    await createMessage.mutateAsync({ message, username: name });
+    await mutateAsync({ message, username: name });
     setMessage("");
   }
 
@@ -94,19 +93,6 @@ function Footer({ name }: { name: string }) {
   );
 }
 
-type MessageData = {
-  message: string;
-  username: string;
-};
-async function postMessage(data: MessageData) {
-  const doc = await addDoc(messageCollection, {
-    ...data,
-    message: data.message.trim(),
-    createdAt: serverTimestamp(),
-  });
-  return doc;
-}
-
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
@@ -119,6 +105,7 @@ const styles = StyleSheet.create({
   footer: {
     padding: PADDING,
     flexDirection: "row",
+    alignItems: "flex-start",
     gap: PADDING,
     borderTopWidth: 1,
     borderTopColor: "black",

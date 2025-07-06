@@ -2,8 +2,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { format, isToday } from "date-fns";
 import {
   DocumentData,
-  getDocs,
-  limit,
   onSnapshot,
   orderBy,
   query,
@@ -13,7 +11,7 @@ import {
   Timestamp,
   where,
 } from "firebase/firestore";
-import { isEmpty, last } from "lodash";
+import { last } from "lodash";
 import { useEffect, useState } from "react";
 import {
   FlatList,
@@ -24,6 +22,7 @@ import {
 } from "react-native";
 import { messageCollection } from "../firebase/messageCollection";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
+import { findMessages } from "@api/messages";
 
 type Props = {
   name: string;
@@ -32,11 +31,9 @@ export default function ChatList({ name }: Props) {
   const newMessages = useSubscribeToChat();
   const messages = useInfiniteQuery({
     queryKey: ["messages"],
-    queryFn: async ({ pageParam }) => findMessages(pageParam),
+    queryFn: async ({ pageParam }) => findMessages({ lastItem: pageParam }),
     initialPageParam: {},
-    getNextPageParam: (lastPage) => {
-      return last(lastPage.docs);
-    },
+    getNextPageParam: (lastPage) => last(lastPage.docs),
   });
 
   const paginatedMessages = messages.data?.pages
@@ -73,7 +70,7 @@ export default function ChatList({ name }: Props) {
         contentContainerStyle={{
           flexDirection: "column-reverse",
         }}
-        onEndReached={async (info) => {
+        onEndReached={async () => {
           if (messages.isFetching || messages.isFetchingNextPage) {
             return;
           }
@@ -93,21 +90,23 @@ function useSubscribeToChat() {
   const [messages, setMessages] = useState<QueryDocumentSnapshot[]>([]);
 
   useEffect(() => {
-    const latestMessage = last(messages);
-    const constraints: QueryConstraint[] = [orderBy("createdAt", "desc")];
-    if (latestMessage) {
-      constraints.push(startAfter(latestMessage));
-    } else {
-      constraints.push(where("createdAt", ">=", Timestamp.now()));
+    function makeConstraints() {
+      const latestMessage = last(messages);
+      const constraints: QueryConstraint[] = [orderBy("createdAt", "desc")];
+      if (latestMessage) {
+        constraints.push(startAfter(latestMessage));
+      } else {
+        constraints.push(where("createdAt", ">=", Timestamp.now()));
+      }
+      return constraints;
     }
-    const q = query(messageCollection, ...constraints);
+
+    const q = query(messageCollection, ...makeConstraints());
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newDocuments = snapshot
         .docChanges()
         .filter((doc) => doc.type === "added")
-        .map((doc) => {
-          return doc.doc;
-        });
+        .map((doc) => doc.doc);
       setMessages((old) => [...old, ...newDocuments]);
     });
 
@@ -139,21 +138,6 @@ function formatMessageSentAt(sentAt: Date) {
     return format(sentAt, "HH:mm");
   }
   return format(sentAt, "yyyy-MM-dd HH:mm");
-}
-
-async function findMessages(lastItem: DocumentData) {
-  const constraints: QueryConstraint[] = [
-    limit(25),
-    orderBy("createdAt", "desc"),
-  ];
-
-  if (!isEmpty(lastItem)) {
-    constraints.push(startAfter(lastItem));
-  }
-  const messageQuery = query(messageCollection, ...constraints);
-  const docsSnapshot = await getDocs(messageQuery);
-
-  return docsSnapshot;
 }
 
 const styles = StyleSheet.create({

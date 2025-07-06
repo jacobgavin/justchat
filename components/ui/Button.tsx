@@ -3,10 +3,13 @@ import { Text, Pressable, PressableProps, StyleSheet } from "react-native";
 import { BORDER_RADIUS, PADDING } from "../../theme/variables";
 
 type Props = Omit<PressableProps, "style" | "accessible">;
-export default function Button(props: PropsWithChildren<Props>) {
+export default function Button({
+  children,
+  ...props
+}: PropsWithChildren<Props>) {
   return (
     <Pressable {...props} style={styles.root} accessible>
-      <Text>Send</Text>
+      <Text>{children}</Text>
     </Pressable>
   );
 }
@@ -14,7 +17,9 @@ export default function Button(props: PropsWithChildren<Props>) {
 const styles = StyleSheet.create({
   root: {
     justifyContent: "center",
-    padding: PADDING,
+    padding: PADDING * 1.5,
+    paddingLeft: PADDING * 2,
+    paddingRight: PADDING * 2,
     borderRadius: BORDER_RADIUS,
     backgroundColor: "pink",
   },
