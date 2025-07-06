@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Pressable,
+  StatusBar,
 } from "react-native";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +17,9 @@ import { useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { messageCollection } from "../firebase/messageCollection";
-import ChatList from "../components/ChatList";
+import ChatList from "../features/ChatList";
+import { useIsKeyboardOpen } from "../hooks/useIsKeyboardOpen";
+import { defaultTo } from "lodash";
 
 export default function ChatScreen() {
   const { name } = useLocalSearchParams();
@@ -26,28 +29,37 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.inner}>
+    <SafeAreaView style={styles.flex}>
+      <View style={styles.flex}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.flex}
+          contentContainerStyle={styles.flex}
+        >
+          <View style={styles.flex}>
             <Header />
 
             <ChatList name={name} />
 
             <Footer name={name} />
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
+  );
+}
+
+function Header() {
+  return (
+    <View style={styles.header}>
+      <Text>Chat</Text>
+    </View>
   );
 }
 
 function Footer({ name }: { name: string }) {
   const [message, setMessage] = useState("");
+  const isKeyboardOpen = useIsKeyboardOpen();
 
   const createMessage = useMutation({
     mutationKey: ["messages"],
@@ -70,7 +82,7 @@ function Footer({ name }: { name: string }) {
   }
 
   return (
-    <View style={styles.footer}>
+    <View style={[styles.footer, isKeyboardOpen && styles.footerKeyboardOpen]}>
       <TextInput
         placeholder="Message..."
         value={message}
@@ -79,10 +91,8 @@ function Footer({ name }: { name: string }) {
         onChangeText={updateMessage}
         onSubmitEditing={submit}
       />
-      <Pressable onPress={submit} style={styles.button}>
-        <View>
-          <Text>Send</Text>
-        </View>
+      <Pressable onPress={submit} style={styles.button} accessible>
+        <Text>Send</Text>
       </Pressable>
     </View>
   );
@@ -95,37 +105,20 @@ type MessageData = {
 async function postMessage(data: MessageData) {
   const doc = await addDoc(messageCollection, {
     ...data,
+    message: data.message.trim(),
     createdAt: serverTimestamp(),
   });
   return doc;
 }
 
-function Header() {
-  return (
-    <View style={styles.header}>
-      <Text>Chat</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: "red",
-  },
-  safeArea: {
-    flex: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: "pink",
-  },
-  inner: {
+  flex: {
     flex: 1,
   },
   header: {
     padding: PADDING,
-    borderBottomColor: "#000",
     borderBottomWidth: 1,
+    borderBottomColor: "black",
   },
   footer: {
     padding: PADDING,
@@ -133,8 +126,9 @@ const styles = StyleSheet.create({
     gap: PADDING,
     borderTopWidth: 1,
     borderTopColor: "black",
-    borderBottomWidth: 1,
-    borderBottomColor: "black",
+  },
+  footerKeyboardOpen: {
+    paddingBottom: defaultTo(StatusBar.currentHeight, 0) + PADDING,
   },
   messageInput: {
     borderColor: "#000",
@@ -145,5 +139,8 @@ const styles = StyleSheet.create({
   button: {
     justifyContent: "center",
     padding: PADDING,
+    borderRadius: BORDER_RADIUS,
+    backgroundColor: "pink",
+    boxShadow: "",
   },
 });

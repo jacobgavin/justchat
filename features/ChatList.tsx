@@ -35,8 +35,7 @@ export default function ChatList({ name }: Props) {
     queryFn: async ({ pageParam }) => findMessages(pageParam),
     initialPageParam: {},
     getNextPageParam: (lastPage) => {
-      const last = lastPage.docs[lastPage.docs.length - 1];
-      return last;
+      return last(lastPage.docs);
     },
   });
 
@@ -65,7 +64,7 @@ export default function ChatList({ name }: Props) {
     );
   }
   return (
-    <View style={{ flex: 1, flexGrow: 1 }}>
+    <>
       {(messages.isLoading || messages.isFetching) && <Text>Loading...</Text>}
       <FlatList
         style={styles.chatList}
@@ -73,7 +72,6 @@ export default function ChatList({ name }: Props) {
         data={allMessages.map(documentToMessage)}
         contentContainerStyle={{
           flexDirection: "column-reverse",
-          paddingBottom: 60,
         }}
         onEndReached={async (info) => {
           if (messages.isFetching || messages.isFetchingNextPage) {
@@ -87,7 +85,7 @@ export default function ChatList({ name }: Props) {
         inverted
         renderItem={renderItem}
       />
-    </View>
+    </>
   );
 }
 
@@ -145,9 +143,10 @@ function formatMessageSentAt(sentAt: Date) {
 
 async function findMessages(lastItem: DocumentData) {
   const constraints: QueryConstraint[] = [
-    limit(12),
+    limit(25),
     orderBy("createdAt", "desc"),
   ];
+
   if (!isEmpty(lastItem)) {
     constraints.push(startAfter(lastItem));
   }
