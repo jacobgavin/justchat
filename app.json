@@ -13,14 +13,19 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gavindevelopment.justchat",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.gavindevelopment.justchat"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,6 +33,18 @@
     "plugins": [
       "expo-router"
     ],
-    "scheme": "justchat-scheme"
+    "scheme": "justchat-scheme",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "73d28009-b1e1-47bd-9fcf-60a4e9a42ecd"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/73d28009-b1e1-47bd-9fcf-60a4e9a42ecd"
+    }
   }
 }
