@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Button,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
 import { useNavigate } from "../router/useNavigate";
+import Button from "@ui/Button";
 
 export default function HomeScreen() {
   return (
@@ -54,7 +54,7 @@ function ChooseDisplayName() {
           onChangeText={updateName}
           onSubmitEditing={() => startChat()}
         />
-        <Button title={"Start chat"} onPress={() => startChat()} />
+        <Button onPress={() => startChat()}>Start chat</Button>
       </View>
       {error && (
         <Text testID="name-error" style={textInputStyles.error}>

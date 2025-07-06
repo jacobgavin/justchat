@@ -5,9 +5,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Pressable,
   StatusBar,
 } from "react-native";
 import { BORDER_RADIUS, PADDING } from "../theme/variables";
@@ -20,6 +17,7 @@ import { messageCollection } from "../firebase/messageCollection";
 import ChatList from "../features/ChatList";
 import { useIsKeyboardOpen } from "../hooks/useIsKeyboardOpen";
 import { defaultTo } from "lodash";
+import Button from "@ui/Button";
 
 export default function ChatScreen() {
   const { name } = useLocalSearchParams();
@@ -91,9 +89,7 @@ function Footer({ name }: { name: string }) {
         onChangeText={updateMessage}
         onSubmitEditing={submit}
       />
-      <Pressable onPress={submit} style={styles.button} accessible>
-        <Text>Send</Text>
-      </Pressable>
+      <Button onPress={submit}>Send</Button>
     </View>
   );
 }
@@ -135,12 +131,5 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS,
     borderWidth: 1,
     flex: 1,
-  },
-  button: {
-    justifyContent: "center",
-    padding: PADDING,
-    borderRadius: BORDER_RADIUS,
-    backgroundColor: "pink",
-    boxShadow: "",
   },
 });
