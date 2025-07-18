@@ -8,7 +8,7 @@ export default function Button({
   ...props
 }: PropsWithChildren<Props>) {
   return (
-    <Pressable {...props} style={styles.root} accessible>
+    <Pressable {...props} role="button" style={styles.root} accessible>
       <Text>{children}</Text>
     </Pressable>
   );
